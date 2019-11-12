@@ -8,20 +8,30 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Handler;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by dave on 10/11/16.
  */
 
 public class GameOfLifeFragment extends Fragment {
+    private final static String TAG = "GAME_O_LIFE";
     // constants for X & O
     private final static int ALIVE = 1;
-    private final static int DEAD = 2;
+    private final static int DEAD = 0;
+
+    private final static int PLAYING = 1;
+    private final static int PAUSED = 0;
 
     private TextView mTextView;
     // Game State
@@ -38,6 +48,9 @@ public class GameOfLifeFragment extends Fragment {
     // RecyclerView Stuff
     private RecyclerView mRecycler;
     private RecyclerView.Adapter<CellHolder> mAdapter = new CellAdapter();
+    private Button mStartButton;
+    private final Handler gameHandler = new Handler();
+    int playState = PAUSED;
 
     @Nullable
     @Override
@@ -50,6 +63,29 @@ public class GameOfLifeFragment extends Fragment {
 
         mTextView = (TextView) v.findViewById(R.id.textView);
 
+        // just recreate activity when want to play again
+        Button startButton = (Button) v.findViewById(R.id.start_button);
+        startButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                final int delay = 1000;
+                if (playState == PAUSED)
+                {
+                    gameHandler.postDelayed(new Runnable(){
+                        public void run(){
+                            gameLoop();
+                            gameHandler.postDelayed(this, delay);
+                        }
+                    }, delay);
+                    playState = PLAYING;
+                }
+
+                else {
+                    gameHandler.removeCallbacksAndMessages(null);
+                    playState = PAUSED;
+                }
+            }
+        });
 
         // just recreate activity when want to play again
         Button resetButton = (Button) v.findViewById(R.id.clone_button);
@@ -61,6 +97,102 @@ public class GameOfLifeFragment extends Fragment {
         });
 
         return v;
+    }
+
+    private void gameLoop()
+    {
+        List<Integer> inverts = new ArrayList<>();
+
+        int count;
+        for (int i = 0; i < mAdapter.getItemCount(); i++)
+        {
+            count = getNumAliveNeighbors(i);
+
+            if (mGrid[i] == ALIVE)
+            {
+                Log.d(TAG, "" + i + ": " + count);
+                if (count != 2 && count != 3)
+                {
+                    inverts.add(i);
+                }
+            } else if (mGrid[i] != ALIVE)
+            {
+                if (count == 3)
+                {
+                    inverts.add(i);
+                }
+            }
+        }
+
+        for (int index: inverts) {
+            if (mGrid[index] == DEAD)
+            {
+                mGrid[index] = ALIVE;
+            } else if (mGrid[index] == ALIVE)
+            {
+                mGrid[index] = DEAD;
+            }
+            mAdapter.notifyItemChanged(index); // reload ViewHolder
+        }
+
+    }
+
+    private int xyToI(int x, int y) {
+        if (x >= 20)
+        {
+            x -= 20;
+        }
+        if (y >= 20)
+        {
+            y -= 20;
+        }
+
+        if (x< 0)
+        {
+            x += 20;
+        }
+
+        if (y < 0)
+        {
+            y += 20;
+        }
+        return x + 20 * y;
+    }
+
+    private int getNumAliveNeighbors(int i)
+    {
+        int[] neighbors = getNeighborIndicies(i);
+        int count = 0;
+        for (int j = 0; j < 8; j++)
+        {
+            if (mGrid[neighbors[j]] == ALIVE)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private int[] getNeighborIndicies(int i)
+    {
+        int index = 0;
+        int[] neighbors = new int[8];
+        int myX = i % 20;
+        int myY = i / 20;
+        for (int x = -1; x < 2; x++)
+        {
+            for (int y = -1; y < 2; y++)
+            {
+                if (x == 0 && y == 0)
+                {
+                    continue;
+                } else {
+                    neighbors[index] =  xyToI(myX + x, myY + y);
+                    index++;
+                }
+            }
+        }
+        return neighbors;
     }
 
     private class CellHolder extends RecyclerView.ViewHolder {
@@ -82,6 +214,7 @@ public class GameOfLifeFragment extends Fragment {
                                                    mGrid[mPosition] = DEAD; // set move
                                                    mTextView.setText(mPosition + "DEAD" + mGrid[mPosition]);
                                                }
+                                               Log.d(TAG, ""+mPosition+": "+getNumAliveNeighbors(mPosition));
                                                mAdapter.notifyItemChanged(mPosition); // reload ViewHolder
                                            }
                                        }
