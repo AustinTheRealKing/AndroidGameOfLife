@@ -34,6 +34,9 @@ public class GameOfLifeFragment extends Fragment {
     private final static int PAUSED = 0;
 
     private TextView mTextView;
+    private Button mColorOneButton;
+    private Button mColorTwoButton;
+    private Button mColorThreeButton;
     // Game State
     private Cell[] mCells = new Cell[400];
     private int generation;
@@ -42,7 +45,11 @@ public class GameOfLifeFragment extends Fragment {
     @ColorInt
     private int deadColor = Color.argb(255, 255, 102, 102);
     @ColorInt
-    private  int backgroundColor = Color.argb(255,0,212, 180);
+    private  int mColorOne = Color.argb(255 ,244,67, 54);
+    @ColorInt
+    private  int mColorTwo = Color.argb(255,0,188, 212);
+    @ColorInt
+    private  int mColorThree = Color.argb(255,228,142, 255);
 
     private int[] mGrid = new int[400];
     // RecyclerView Stuff
@@ -86,6 +93,31 @@ public class GameOfLifeFragment extends Fragment {
                 }
             }
         });
+
+        mColorOneButton = (Button) v.findViewById(R.id.color_one);
+        mColorOneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mRecycler.setBackgroundColor(mColorOne);
+            }
+        });
+
+        mColorTwoButton = (Button) v.findViewById(R.id.color_two);
+        mColorTwoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mRecycler.setBackgroundColor(mColorTwo);
+            }
+        });
+
+        mColorThreeButton = (Button) v.findViewById(R.id.color_three);
+        mColorThreeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mRecycler.setBackgroundColor(mColorThree);
+            }
+        });
+
 
         // just recreate activity when want to play again
         Button resetButton = (Button) v.findViewById(R.id.clone_button);
@@ -237,7 +269,7 @@ public class GameOfLifeFragment extends Fragment {
             if (mGrid[position] == ALIVE) {
                 holder.mButton.setBackgroundColor(aliveColor);
             } else if (mGrid[position] == DEAD) {
-                holder.mButton.setBackgroundColor(deadColor);
+                holder.mButton.setBackgroundColor(R.drawable.empty);
             } else {
                 holder.mButton.setBackgroundResource(R.drawable.empty);
             }
