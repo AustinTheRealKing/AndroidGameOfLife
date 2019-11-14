@@ -3,6 +3,8 @@ package com.example.myapplication;
 import android.graphics.Color;
 import android.os.Bundle;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.animation.Animation;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -84,6 +87,11 @@ public class GameOfLifeFragment extends Fragment {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (startButton.getText() == "Stop"){
+                    startButton.setText("Start");
+                }else {
+                    startButton.setText("Stop");
+                }
                 final int delay = 1000;
                 if (playState == WAITING)
                 {
@@ -132,14 +140,29 @@ public class GameOfLifeFragment extends Fragment {
 
 
         // just recreate activity when want to play again
-        Button resetButton = (Button) v.findViewById(R.id.clone_button);
+        Button resetButton = (Button) v.findViewById(R.id.reset_button);
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 getActivity().recreate();
             }
         });
-
+        
+        Button saveButton = (Button) v.findViewById(R.id.save_button);
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try{
+                    FileOutputStream fos= new FileOutputStream("myfile");
+                    ObjectOutputStream oos= new ObjectOutputStream(fos);
+                    oos.writeObject(mGrid);
+                    oos.close();
+                    fos.close();
+                }catch(IOException ioe){
+                    ioe.printStackTrace();
+                }
+            }
+        });
         return v;
     }
 
@@ -305,7 +328,12 @@ public class GameOfLifeFragment extends Fragment {
 
             mTextView.setText(position + "ALIVE" + mCells[position].getStatus());
             if (mCells[position].getStatus() == ALIVE) {
-                holder.mButton.setBackgroundColor(aliveColor);
+                ObjectAnimator anim = ObjectAnimator.ofInt(holder.mButton, "backgroundColor", aliveColor, mCurrentBackground,
+                        aliveColor);
+                anim.setDuration(1500);
+                anim.setEvaluator(new ArgbEvaluator());
+                anim.setRepeatCount(Animation.INFINITE);
+                anim.start();
             } else if (mCells[position].getStatus() == DEAD) {
                 holder.mButton.setBackgroundColor(R.drawable.empty);
             } else {
