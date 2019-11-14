@@ -22,7 +22,9 @@ public class Cell {
     public void setDeadColor(int deadColor){this.deadColor = deadColor; }
 
     public void setAlive() {this.status = 1; }
-    public void setDead() {this.status = 2; }
+    public void setDead() {this.status = 0; }
+
+    public void invert() {this.status = (this.status == 1) ? 0 : 1;}
 
     /*public void setStatus(boolean newStatus) {
         this.status = newStatus;
