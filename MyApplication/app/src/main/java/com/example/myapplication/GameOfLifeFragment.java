@@ -324,14 +324,14 @@ public class GameOfLifeFragment extends Fragment {
             holder.bindPosition(position);
             // actually change image displayed
 
-            mTextView.setText(position + "ALIVE" + mCells[position].getStatus());
             if (mCells[position].getStatus() == ALIVE) {
-                ObjectAnimator anim = ObjectAnimator.ofInt(holder.mButton, "backgroundColor", aliveColor, deadColor,
-                        aliveColor);
-                anim.setDuration(1500);
-                anim.setEvaluator(new ArgbEvaluator());
-                anim.setRepeatCount(Animation.INFINITE);
-                anim.start();
+                holder.mButton.setBackgroundColor(aliveColor);
+                Animation mAnimation = new AlphaAnimation(1, 0);
+                mAnimation.setDuration(200);
+                mAnimation.setInterpolator(new LinearInterpolator());
+                mAnimation.setRepeatCount(Animation.INFINITE);
+                mAnimation.setRepeatMode(Animation.REVERSE);
+                holder.mButton.startAnimation(mAnimation);
             } else if (mCells[position].getStatus() == DEAD) {
                 holder.mButton.setBackgroundColor(R.drawable.empty);
             } else {
