@@ -2,7 +2,9 @@ package com.example.myapplication;
 
 import androidx.annotation.ColorInt;
 
-public class Cell {
+import java.io.Serializable;
+
+public class Cell implements Serializable {
     private static final int LIFESPAN = 10;
     private static final int COLORCHANGESPEED = 20;
     private int age;

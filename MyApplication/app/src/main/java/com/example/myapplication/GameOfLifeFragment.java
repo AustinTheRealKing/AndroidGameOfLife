@@ -21,8 +21,10 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +41,7 @@ public class GameOfLifeFragment extends Fragment {
     private final static int PLAYING = 1;
     private final static int WAITING = 0;
 
-    private final static String mSaveFileLocation = "";
+    private String mSaveFileLocation;
 
     private TextView mTextView;
     private Button mColorOneButton;
@@ -71,6 +73,8 @@ public class GameOfLifeFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_game_of_life, container, false);
         // setup recycler view
 
+        mSaveFileLocation = getContext().getFilesDir().getPath() + "/save_file.txt";
+
         for (int i = 0; i < 400; i++)
         {
             mCells[i] = new Cell(aliveColor, deadColor);
@@ -87,12 +91,6 @@ public class GameOfLifeFragment extends Fragment {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (startButton.getText() == "Stop"){
-                    startButton.setText("Start");
-                }else {
-                    startButton.setText("Stop");
-                }
-                final int delay = 1000;
                 if (playState == WAITING)
                 {
                     startButton.setText("Stop");
@@ -153,9 +151,9 @@ public class GameOfLifeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 try{
-                    FileOutputStream fos= new FileOutputStream("myfile");
+                    FileOutputStream fos= new FileOutputStream(mSaveFileLocation);
                     ObjectOutputStream oos= new ObjectOutputStream(fos);
-                    oos.writeObject(mGrid);
+                    oos.writeObject(mCells);
                     oos.close();
                     fos.close();
                 }catch(IOException ioe){
@@ -169,7 +167,7 @@ public class GameOfLifeFragment extends Fragment {
     private void loadFromFile()
     {
         try {
-            FileInputStream fis = getContext().openFileInput(mSaveFileLocation);
+            FileInputStream fis = new FileInputStream(mSaveFileLocation);
             ObjectInputStream is = new ObjectInputStream(fis);
             mCells = (Cell[]) is.readObject();
             is.close();
@@ -328,7 +326,7 @@ public class GameOfLifeFragment extends Fragment {
 
             mTextView.setText(position + "ALIVE" + mCells[position].getStatus());
             if (mCells[position].getStatus() == ALIVE) {
-                ObjectAnimator anim = ObjectAnimator.ofInt(holder.mButton, "backgroundColor", aliveColor, mCurrentBackground,
+                ObjectAnimator anim = ObjectAnimator.ofInt(holder.mButton, "backgroundColor", aliveColor, deadColor,
                         aliveColor);
                 anim.setDuration(1500);
                 anim.setEvaluator(new ArgbEvaluator());
