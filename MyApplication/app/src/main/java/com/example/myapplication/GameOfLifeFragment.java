@@ -17,6 +17,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +33,10 @@ public class GameOfLifeFragment extends Fragment {
     private final static int ALIVE = 1;
     private final static int DEAD = 0;
 
-    private final static int PLAYING = 2;
-    private final static int PICKING = 1;
+    private final static int PLAYING = 1;
     private final static int WAITING = 0;
+
+    private final static String mSaveFileLocation = "";
 
     private TextView mTextView;
     private Button mColorOneButton;
@@ -94,6 +98,14 @@ public class GameOfLifeFragment extends Fragment {
             }
         });
 
+        Button openButt = (Button) v.findViewById(R.id.open_button);
+        openButt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadFromFile();
+            }
+        });
+
         mColorOneButton = (Button) v.findViewById(R.id.color_one);
         mColorOneButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,6 +141,27 @@ public class GameOfLifeFragment extends Fragment {
         });
 
         return v;
+    }
+
+    private void loadFromFile()
+    {
+        try {
+            FileInputStream fis = getContext().openFileInput(mSaveFileLocation);
+            ObjectInputStream is = new ObjectInputStream(fis);
+            mCells = (Cell[]) is.readObject();
+            is.close();
+            fis.close();
+            for (int i = 0; i < 400; i++)
+            {
+                mAdapter.notifyItemChanged(i); // reload ViewHolder
+            }
+
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     private void startGameLoop()
