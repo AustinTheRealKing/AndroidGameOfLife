@@ -26,12 +26,13 @@ public class Cell implements Serializable {
     public void setAlive() {this.status = 1; }
     public void setDead() {this.status = 0; }
 
+    //invert the status of the cell
     public void invert() {this.status = (this.status == 1) ? 0 : 1;}
 
     /*public void setStatus(boolean newStatus) {
         this.status = newStatus;
     }*/
-
+    //get the cells status
     public int getStatus() {
         return this.status;
     }

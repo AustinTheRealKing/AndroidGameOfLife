@@ -74,9 +74,9 @@ public class GameOfLifeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View v = inflater.inflate(R.layout.fragment_game_of_life, container, false);
         // setup recycler view
-
+        //get local file location for saving and loading
         mSaveFileLocation = getContext().getFilesDir().getPath() + "/save_file.txt";
-
+        //create cell array
         for (int i = 0; i < 400; i++)
         {
             mCells[i] = new Cell(aliveColor, deadColor);
@@ -93,19 +93,20 @@ public class GameOfLifeFragment extends Fragment {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //if we are currently waiting then start
                 if (playState == WAITING)
                 {
                     startButton.setText("Stop");
                     startGameLoop();
                 }
-
+                //if we are running the game then pause it
                 else if (playState == PLAYING) {
                     startButton.setText("Start");
                     stopGameLoop();
                 }
             }
         });
-
+        //setting up some button listeners
         Button openButt = (Button) v.findViewById(R.id.open_button);
         openButt.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -166,16 +167,21 @@ public class GameOfLifeFragment extends Fragment {
         return v;
     }
 
+    //method for loading cell array from file
     private void loadFromFile()
     {
         try {
+            //create input stream
             FileInputStream fis = new FileInputStream(mSaveFileLocation);
+            //wrap object stream around it
             ObjectInputStream is = new ObjectInputStream(fis);
+            //put the file into the cell array
             mCells = (Cell[]) is.readObject();
             is.close();
             fis.close();
             for (int i = 0; i < 400; i++)
             {
+                //make sure the map updates
                 mAdapter.notifyItemChanged(i); // reload ViewHolder
             }
 
@@ -187,41 +193,52 @@ public class GameOfLifeFragment extends Fragment {
 
     }
 
+    //used to begin the game infinite looping
     private void startGameLoop()
     {
+        //set the "framerate" for the game
         final int delay = 1000;
         gameHandler.postDelayed(new Runnable(){
             public void run(){
+                //assigns this callback to be run every second then has it loop in a second
                 gameLoop();
                 gameHandler.postDelayed(this, delay);
             }
         }, delay);
+        //change the state
         playState = PLAYING;
     }
 
+    //used to stop looping game
     private void stopGameLoop()
     {
+        //removes the callback so it stops looping
         gameHandler.removeCallbacksAndMessages(null);
         playState = WAITING;
     }
 
+    //this is the actual game loop itself
     private void gameLoop()
     {
+        //array to hold what needs to be swapped. we did it like this to make sure we dont change the grid while we are still processing it
         List<Integer> inverts = new ArrayList<>();
-
         int count;
+        //for each cell
         for (int i = 0; i < mAdapter.getItemCount(); i++)
         {
+            //get number of alive neighbors
             count = getNumAliveNeighbors(i);
-
+            //if its alive
             if (mCells[i].getStatus() == ALIVE)
             {
+                //check if it should invert
                 if (count != 2 && count != 3)
                 {
                     inverts.add(i);
                 }
             } else if (mCells[i].getStatus() != ALIVE)
             {
+                //do the same but with different requirements
                 if (count == 3)
                 {
                     inverts.add(i);
@@ -229,6 +246,7 @@ public class GameOfLifeFragment extends Fragment {
             }
         }
 
+        //actually invert all the cells that need it and update the display
         for (int index: inverts) {
             mCells[index].invert();
             mAdapter.notifyItemChanged(index); // reload ViewHolder
@@ -236,7 +254,9 @@ public class GameOfLifeFragment extends Fragment {
 
     }
 
+    //converts an (X,Y) position for a 2d array to a 1d index
     private int xyToI(int x, int y) {
+        //all these if statements are to make sure it wraps correctly
         if (x >= 20)
         {
             x -= 20;
@@ -260,6 +280,7 @@ public class GameOfLifeFragment extends Fragment {
 
     private int getNumAliveNeighbors(int i)
     {
+        //get the indexes of the neighbors
         int[] neighbors = getNeighborIndicies(i);
         int count = 0;
         for (int j = 0; j < 8; j++)
@@ -276,16 +297,19 @@ public class GameOfLifeFragment extends Fragment {
     {
         int index = 0;
         int[] neighbors = new int[8];
+        //convert the 1d position of this cell to a 2d position
         int myX = i % 20;
         int myY = i / 20;
         for (int x = -1; x < 2; x++)
         {
             for (int y = -1; y < 2; y++)
             {
+                //iterate over the 9 cell (3X3) area around the target, ignoring itself
                 if (x == 0 && y == 0)
                 {
                     continue;
                 } else {
+                    //we had to convert to 2d coordinates to fix wrapping
                     neighbors[index] =  xyToI(myX + x, myY + y);
                     index++;
                 }
