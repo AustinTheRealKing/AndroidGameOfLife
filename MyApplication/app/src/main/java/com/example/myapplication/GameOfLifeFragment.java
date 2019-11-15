@@ -28,10 +28,6 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by dave on 10/11/16.
- */
-
 public class GameOfLifeFragment extends Fragment {
     private final static String TAG = "GAME_O_LIFE";
     private final static int ALIVE = 1;
