@@ -1,10 +1,9 @@
 package com.example.myapplication;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 
-import android.animation.ArgbEvaluator;
-import android.animation.ObjectAnimator;
 import androidx.annotation.ColorInt;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -80,6 +79,14 @@ public class GameOfLifeFragment extends Fragment {
         for (int i = 0; i < 400; i++)
         {
             mCells[i] = new Cell(aliveColor, deadColor);
+        }
+        
+        Intent intent = getActivity().getIntent();
+
+        if (intent.getExtras() != null) {
+            if (intent.getExtras().containsKey("CELLS_EXTRA")) {
+                mCells = (Cell[])intent.getSerializableExtra("CELLS_EXTRA");
+            }
         }
 
         mRecycler = (RecyclerView) v.findViewById(R.id.reycler_tic_tac_toe);
@@ -162,6 +169,16 @@ public class GameOfLifeFragment extends Fragment {
                 }catch(IOException ioe){
                     ioe.printStackTrace();
                 }
+            }
+        });
+        
+        Button cloneButton = (Button) v.findViewById(R.id.clone_button);
+        cloneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                GameOfLifeActivity gameActivity = new GameOfLifeActivity();
+                Intent intent = gameActivity.cloneFrag(getActivity(), mCells);
+                startActivity(intent);
             }
         });
         return v;
