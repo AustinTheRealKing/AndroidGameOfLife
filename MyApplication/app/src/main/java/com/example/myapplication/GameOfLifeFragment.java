@@ -177,7 +177,7 @@ public class GameOfLifeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 GameOfLifeActivity gameActivity = new GameOfLifeActivity();
-                Intent intent = gameActivity.cloneFrag(getActivity(), mCells);
+                Intent intent = gameActivity.cloneFragment(getActivity(), mCells);
                 startActivity(intent);
             }
         });
