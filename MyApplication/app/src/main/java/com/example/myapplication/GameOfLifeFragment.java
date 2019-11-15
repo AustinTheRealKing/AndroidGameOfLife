@@ -19,7 +19,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
-import android.widget.TextView;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -35,7 +34,6 @@ import java.util.List;
 
 public class GameOfLifeFragment extends Fragment {
     private final static String TAG = "GAME_O_LIFE";
-    // constants for X & O
     private final static int ALIVE = 1;
     private final static int DEAD = 0;
 
@@ -43,30 +41,24 @@ public class GameOfLifeFragment extends Fragment {
     private final static int WAITING = 0;
 
     private String mSaveFileLocation;
-
-    private TextView mTextView;
     private Button mColorOneButton;
     private Button mColorTwoButton;
     private Button mColorThreeButton;
-    // Game State
     private Cell[] mCells = new Cell[400];
-    private int generation;
     @ColorInt
-    private int aliveColor = Color.argb(255, 102, 255, 255);
+    private int mAliveColor = Color.argb(255, 102, 255, 255);
     @ColorInt
-    private int deadColor = Color.argb(1, 1, 1, 0);
+    private int mDeadColor = Color.argb(1, 1, 1, 0);
     @ColorInt
     private  int mColorOne = Color.argb(255 ,244,67, 54);
     @ColorInt
     private  int mColorTwo = Color.argb(255,0,188, 212);
     @ColorInt
     private  int mColorThree = Color.argb(255,228,142, 255);
-
-    // RecyclerView Stuff
     private RecyclerView mRecycler;
     private RecyclerView.Adapter<CellHolder> mAdapter = new CellAdapter();
-    private final Handler gameHandler = new Handler();
-    private int playState = WAITING;
+    private final Handler mGameHandler = new Handler();
+    private int mPlayState = WAITING;
 
     @Nullable
     @Override
@@ -78,7 +70,7 @@ public class GameOfLifeFragment extends Fragment {
         //create cell array
         for (int i = 0; i < 400; i++)
         {
-            mCells[i] = new Cell(aliveColor, deadColor);
+            mCells[i] = new Cell(mAliveColor, mDeadColor);
         }
         
         Intent intent = getActivity().getIntent();
@@ -89,11 +81,9 @@ public class GameOfLifeFragment extends Fragment {
             }
         }
 
-        mRecycler = (RecyclerView) v.findViewById(R.id.reycler_tic_tac_toe);
+        mRecycler = (RecyclerView) v.findViewById(R.id.reycler_game_of_life);
         mRecycler.setLayoutManager(new GridLayoutManager(getActivity(), 20));
         mRecycler.setAdapter(mAdapter);
-
-        mTextView = (TextView) v.findViewById(R.id.textView);
 
         // just recreate activity when want to play again
         final Button startButton = (Button) v.findViewById(R.id.start_button);
@@ -101,13 +91,13 @@ public class GameOfLifeFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 //if we are currently waiting then start
-                if (playState == WAITING)
+                if (mPlayState == WAITING)
                 {
                     startButton.setText("Stop");
                     startGameLoop();
                 }
                 //if we are running the game then pause it
-                else if (playState == PLAYING) {
+                else if (mPlayState == PLAYING) {
                     startButton.setText("Start");
                     stopGameLoop();
                 }
@@ -230,23 +220,23 @@ public class GameOfLifeFragment extends Fragment {
     {
         //set the "framerate" for the game
         final int delay = 1000;
-        gameHandler.postDelayed(new Runnable(){
+        mGameHandler.postDelayed(new Runnable(){
             public void run(){
                 //assigns this callback to be run every second then has it loop in a second
                 gameLoop();
-                gameHandler.postDelayed(this, delay);
+                mGameHandler.postDelayed(this, delay);
             }
         }, delay);
         //change the state
-        playState = PLAYING;
+        mPlayState = PLAYING;
     }
 
     //used to stop looping game
     private void stopGameLoop()
     {
         //removes the callback so it stops looping
-        gameHandler.removeCallbacksAndMessages(null);
-        playState = WAITING;
+        mGameHandler.removeCallbacksAndMessages(null);
+        mPlayState = WAITING;
     }
 
     //this is the actual game loop itself
@@ -383,7 +373,7 @@ public class GameOfLifeFragment extends Fragment {
             // actually change image displayed
 
             if (mCells[position].getStatus() == ALIVE) {
-                holder.mButton.setBackgroundColor(aliveColor);
+                holder.mButton.setBackgroundColor(mAliveColor);
                 Animation mAnimation = new AlphaAnimation(1, 0);
                 mAnimation.setDuration(200);
                 mAnimation.setInterpolator(new LinearInterpolator());
