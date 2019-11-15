@@ -122,6 +122,7 @@ public class GameOfLifeFragment extends Fragment {
             }
         });
 
+        //click to change to color option 1
         mColorOneButton = (Button) v.findViewById(R.id.color_one);
         mColorOneButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -130,6 +131,7 @@ public class GameOfLifeFragment extends Fragment {
             }
         });
 
+        //click to change to color option 2
         mColorTwoButton = (Button) v.findViewById(R.id.color_two);
         mColorTwoButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -138,6 +140,7 @@ public class GameOfLifeFragment extends Fragment {
             }
         });
 
+        //click to change to color option 3
         mColorThreeButton = (Button) v.findViewById(R.id.color_three);
         mColorThreeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -155,33 +158,45 @@ public class GameOfLifeFragment extends Fragment {
                 getActivity().recreate();
             }
         });
-        
+
+        //save the cells array
         Button saveButton = (Button) v.findViewById(R.id.save_button);
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try{
-                    FileOutputStream fos= new FileOutputStream(mSaveFileLocation);
-                    ObjectOutputStream oos= new ObjectOutputStream(fos);
-                    oos.writeObject(mCells);
-                    oos.close();
-                    fos.close();
-                }catch(IOException ioe){
-                    ioe.printStackTrace();
-                }
+                saveToFile();
             }
         });
-        
+
+        //starts an intent that is created by cloneFragment in GameOfLifeActivity
         Button cloneButton = (Button) v.findViewById(R.id.clone_button);
         cloneButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                GameOfLifeActivity gameActivity = new GameOfLifeActivity();
-                Intent intent = gameActivity.cloneFragment(getActivity(), mCells);
+                //create intent with fragments origin context and GameOfLifeActivity
+                Intent intent = new Intent(getActivity(), GameOfLifeActivity.class);
+                //put the cells array into the intent
+                intent.putExtra("CELLS_EXTRA", mCells);
                 startActivity(intent);
             }
         });
         return v;
+    }
+
+    //method for saving cell array to file
+    private void saveToFile(){
+        try{
+            //create output stream
+            FileOutputStream fos= new FileOutputStream(mSaveFileLocation);
+            //wrap objcet stream around it
+            ObjectOutputStream oos= new ObjectOutputStream(fos);
+            //put cel array into the object stream
+            oos.writeObject(mCells);
+            oos.close();
+            fos.close();
+        }catch(IOException ioe){
+            ioe.printStackTrace();
+        }
     }
 
     //method for loading cell array from file
